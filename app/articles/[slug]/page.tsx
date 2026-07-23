@@ -54,11 +54,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
           <span className="flex items-center gap-1.5"><BookOpen size={14} /> By {data.authorName}</span>
         </div>
 
-        {data.excerpt && <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground border-l-2 border-cyan-400 pl-3 sm:pl-4">{data.excerpt}</p>}
+        {data.excerpt && <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground border-l-2 border-cyan-400 pl-3 sm:pl-4 font-serif leading-relaxed">{data.excerpt}</p>}
 
-        <article className="mt-8 space-y-4">
+        <article className="mt-8 space-y-5">
           {data.content.split('\n\n').map((paragraph, i) => (
-            <p key={i} className="text-base sm:text-lg leading-relaxed text-foreground/90">
+            <p key={i} className="text-base sm:text-lg leading-[1.85] font-serif text-foreground/90">
               {paragraph}
             </p>
           ))}

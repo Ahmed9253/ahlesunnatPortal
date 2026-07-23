@@ -78,7 +78,7 @@ export default function QuestionComments({ questionId }: { questionId: string })
                 {c.starred && <Star size={12} className="fill-yellow-400 text-yellow-400" />}
                 <span className="ml-auto text-[10px] text-muted-foreground/70">{new Date(c.createdAt).toLocaleDateString()}</span>
               </div>
-              <div className="text-sm text-muted-foreground prose-dark">
+              <div className="text-sm text-muted-foreground prose-dark font-serif">
                 <Markdown remarkPlugins={[remarkGfm]}>{c.content}</Markdown>
               </div>
             </div>

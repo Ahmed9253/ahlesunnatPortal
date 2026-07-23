@@ -30,42 +30,40 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero with Carousel */}
-      <section className="relative h-[70vh] sm:h-[85vh] overflow-hidden">
+      <section className="relative h-[60vh] sm:h-[70vh] md:h-[80vh] overflow-hidden">
         <HeroCarousel />
-        <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 sm:px-6 py-12 sm:py-20 text-center">
-          <p className="mb-4 text-2xl sm:text-3xl md:text-4xl text-foreground font-semibold" dir="rtl" style={{ fontFamily: 'serif' }}>
-            بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-          </p>
-          <div className="mb-6 flex items-center justify-center gap-3 text-xs font-semibold uppercase tracking-[0.3em] text-cyan-400/80">
-            <span className="h-px w-10 bg-cyan-400/50" />
-            Ahlesunnat Portal
-            <span className="h-px w-10 bg-cyan-400/50" />
-          </div>
-          <h1 className="text-3xl font-black tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-            Seek <span className="text-cyan-400">Knowledge</span>,<br />
-            Find <span className="text-cyan-400">Answers</span>
-          </h1>
-          <p className="mx-auto mt-6 sm:mt-8 max-w-2xl text-base sm:text-xl text-muted-foreground">
-            A trusted platform for authentic Islamic knowledge — articles, scholarly insights, and a community Q&A forum rooted in the creed of Ahlus Sunnah Wal Jama&#39;at.
-          </p>
-          <div className="mt-6 sm:mt-8 mx-auto max-w-xl flex flex-wrap items-center justify-center gap-x-3 sm:gap-x-6 gap-y-2 text-xs sm:text-base text-muted-foreground">
-            <span className="flex items-center gap-1.5"><span className="text-cyan-400">&#9670;</span> Quran &amp; Sunnah</span>
-            <span className="flex items-center gap-1.5"><span className="text-cyan-400">&#9670;</span> Aqeedah</span>
-            <span className="flex items-center gap-1.5"><span className="text-cyan-400">&#9670;</span> Fiqh</span>
-            <span className="flex items-center gap-1.5"><span className="text-cyan-400">&#9670;</span> Tafseer</span>
-            <span className="flex items-center gap-1.5"><span className="text-cyan-400">&#9670;</span> Hadith</span>
-          </div>
-          <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-            <Link href="/articles" className="cursor-pointer inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-5 sm:px-8 py-2.5 sm:py-3.5 text-sm sm:text-base font-bold text-zinc-950 hover:bg-cyan-400 transition-colors">
-              <BookOpen size={18} /> Read Articles
-            </Link>
-            <Link href="/qa" className="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-white/20 px-5 sm:px-8 py-2.5 sm:py-3.5 text-sm sm:text-base font-semibold text-muted-foreground hover:border-cyan-400 hover:text-foreground transition-colors">
-              <MessageCircleQuestion size={18} /> Q&A Forum
-            </Link>
-          </div>
-          <div className="mt-8 sm:mt-10 flex items-center justify-center gap-6 sm:gap-8 text-sm sm:text-base text-muted-foreground">
-            <span><span className="font-bold text-foreground">{totalArticles}</span> Articles</span>
-            <span><span className="font-bold text-foreground">{totalQuestions}</span> Questions</span>
+        <div className="relative z-10 flex h-full flex-col items-start justify-center px-6 sm:px-12 md:px-16 lg:px-24 py-12 sm:py-20 text-left">
+          <div className="w-full max-w-lg md:max-w-xl lg:max-w-2xl">
+          <div className="mb-4 flex items-center gap-3 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.3em] text-cyan-400/80">
+              <span className="h-px w-8 bg-cyan-400/50" />
+              Ahlesunnat Portal
+            </div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight">
+              Seek <span className="text-cyan-400">Knowledge</span>,<br />
+              Find <span className="text-cyan-400">Answers</span>
+            </h1>
+            <p className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg text-muted-foreground/90 leading-relaxed">
+              A trusted platform for authentic Islamic knowledge — articles, scholarly insights, and a community Q&A forum rooted in the creed of Ahlus Sunnah Wal Jama&#39;at.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] sm:text-sm text-muted-foreground">
+              <span className="flex items-center gap-1.5"><span className="text-cyan-400">&#9670;</span> Quran &amp; Sunnah</span>
+              <span className="flex items-center gap-1.5"><span className="text-cyan-400">&#9670;</span> Aqeedah</span>
+              <span className="flex items-center gap-1.5"><span className="text-cyan-400">&#9670;</span> Fiqh</span>
+              <span className="flex items-center gap-1.5"><span className="text-cyan-400">&#9670;</span> Tafseer</span>
+              <span className="flex items-center gap-1.5"><span className="text-cyan-400">&#9670;</span> Hadith</span>
+            </div>
+            <div className="mt-6 sm:mt-7 flex flex-wrap items-center gap-3">
+              <Link href="/articles" className="cursor-pointer inline-flex items-center gap-2 rounded-lg bg-cyan-500 px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-bold text-zinc-950 hover:bg-cyan-400 transition-colors">
+                <BookOpen size={16} /> Read Articles
+              </Link>
+              <Link href="/qa" className="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-white/20 px-5 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-semibold text-muted-foreground hover:border-cyan-400 hover:text-foreground transition-colors">
+                <MessageCircleQuestion size={16} /> Q&A Forum
+              </Link>
+            </div>
+            <div className="mt-6 flex items-center gap-6 text-sm text-muted-foreground">
+              <span><span className="font-bold text-foreground">{totalArticles}</span> Articles</span>
+              <span><span className="font-bold text-foreground">{totalQuestions}</span> Questions</span>
+            </div>
           </div>
         </div>
       </section>

@@ -65,7 +65,7 @@ export default async function ArticlesPage({ searchParams }: { searchParams: Pro
                     {article.starred && <Star size={12} className="fill-yellow-400 text-yellow-400" />}
                   </div>
                   <h3 className="mt-2 text-base sm:text-lg font-bold text-foreground line-clamp-2">{article.title}</h3>
-                  <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-muted-foreground line-clamp-2">{article.excerpt}</p>
+                  <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-muted-foreground line-clamp-2 font-serif">{article.excerpt}</p>
                   <div className="mt-3 sm:mt-4 text-[10px] sm:text-xs text-muted-foreground/70">
                     {new Date(article.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>

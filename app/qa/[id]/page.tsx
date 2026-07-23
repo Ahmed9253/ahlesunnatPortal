@@ -59,7 +59,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
             </div>
           </div>
 
-          <div className="mt-4 sm:mt-6 text-sm sm:text-base text-muted-foreground whitespace-pre-wrap leading-relaxed">{question.content}</div>
+          <div className="mt-4 sm:mt-6 text-sm sm:text-base text-muted-foreground whitespace-pre-wrap leading-relaxed font-serif">{question.content}</div>
 
           {question.images && question.images.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
@@ -84,7 +84,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
                 </p>
               </div>
             </div>
-            <div className="prose-dark">
+            <div className="prose-dark font-serif">
               <Markdown remarkPlugins={[remarkGfm]}>{question.adminAnswer.content}</Markdown>
             </div>
           </div>

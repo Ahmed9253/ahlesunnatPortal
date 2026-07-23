@@ -58,7 +58,7 @@ export default function HeroCarousel() {
 
       {/* Dark gradient overlays */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
 
       {/* Navigation arrows */}
       {images.length > 1 && (

@@ -76,7 +76,7 @@ export default function ArticleComments({ articleId }: { articleId: string }) {
                 {c.starred && <Star size={12} className="fill-yellow-400 text-yellow-400" />}
                 <span className="ml-auto text-[10px] text-muted-foreground/70">{new Date(c.createdAt).toLocaleDateString()}</span>
               </div>
-              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{c.content}</p>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap font-serif">{c.content}</p>
             </div>
           ))}
         </div>
