@@ -16,8 +16,8 @@ export default async function Home() {
   const db = await getDb();
   if (db) {
     const [a, q, ta, tq] = await Promise.all([
-      db.collection<Article>('articles').find().sort({ publishedAt: -1 }).limit(6).toArray(),
-      db.collection<Question>('questions').find({ status: 'answered' }).sort({ updatedAt: -1 }).limit(4).toArray(),
+      db.collection<Article>('articles').find().sort({ publishedAt: -1 }).limit(8).toArray(),
+      db.collection<Question>('questions').find({ status: 'answered' }).sort({ updatedAt: -1 }).limit(8).toArray(),
       db.collection<Article>('articles').countDocuments(),
       db.collection<Question>('questions').countDocuments(),
     ]);
@@ -80,7 +80,7 @@ export default async function Home() {
                 View all <ArrowRight size={14} />
               </Link>
             </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {articles.map((article) => (
                 <Link key={article.id} href={`/articles/${article.slug}`} className="group cursor-pointer rounded-xl border border-white/10 bg-card/80 overflow-hidden hover:border-cyan-400/30 transition-all">
                   {article.coverImage && (
@@ -100,6 +100,13 @@ export default async function Home() {
                 </Link>
               ))}
             </div>
+            {totalArticles > 8 && (
+              <div className="mt-8 text-center">
+                <Link href="/articles" className="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-white/20 px-6 py-3 text-sm font-semibold text-muted-foreground hover:border-cyan-400 hover:text-foreground transition-colors">
+                  <BookOpen size={16} /> More Articles <ArrowRight size={14} />
+                </Link>
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -128,6 +135,13 @@ export default async function Home() {
                 </Link>
               ))}
             </div>
+            {totalQuestions > 8 && (
+              <div className="mt-8 text-center">
+                <Link href="/qa" className="cursor-pointer inline-flex items-center gap-2 rounded-lg border border-white/20 px-6 py-3 text-sm font-semibold text-muted-foreground hover:border-cyan-400 hover:text-foreground transition-colors">
+                  <MessageCircleQuestion size={16} /> More Questions <ArrowRight size={14} />
+                </Link>
+              </div>
+            )}
           </div>
         </section>
       )}

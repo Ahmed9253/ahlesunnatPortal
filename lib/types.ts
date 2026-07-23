@@ -49,6 +49,19 @@ export type Comment = {
   createdAt: string;
 };
 
+export type QuestionComment = {
+  _id?: ObjectId;
+  id: string;
+  questionId: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  content: string;
+  isAdminReply: boolean;
+  starred: boolean;
+  createdAt: string;
+};
+
 export type Question = {
   _id?: ObjectId;
   id: string;

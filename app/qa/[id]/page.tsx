@@ -3,10 +3,11 @@ import { notFound } from 'next/navigation';
 import { getDb } from '@/lib/mongodb';
 import { stripMongoId } from '@/lib/types';
 import type { Question } from '@/lib/types';
-import { ArrowLeft, CheckCircle, Clock, Star, MessageCircleQuestion } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, Star, MessageCircleQuestion, User } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ZoomableImage from '@/components/ui/zoomable-image';
+import QuestionComments from '@/components/questions/question-comments';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,6 +37,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
           <ArrowLeft size={14} /> Back to Q&A
         </Link>
 
+        {/* Question Section */}
         <div className="rounded-xl border border-white/10 bg-card/80 p-4 sm:p-6 md:p-8">
           <div className="flex items-center gap-2 mb-4">
             <span className="rounded-full bg-cyan-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-cyan-400">{question.category}</span>
@@ -57,7 +59,7 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
             </div>
           </div>
 
-          <div className="mt-4 sm:mt-6 text-sm sm:text-base text-muted-foreground whitespace-pre-wrap">{question.content}</div>
+          <div className="mt-4 sm:mt-6 text-sm sm:text-base text-muted-foreground whitespace-pre-wrap leading-relaxed">{question.content}</div>
 
           {question.images && question.images.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
@@ -68,28 +70,42 @@ export default async function QuestionPage({ params }: { params: Promise<{ id: s
           )}
         </div>
 
-        {/* Admin Answer */}
+        {/* Admin Answer Section */}
         {question.adminAnswer && (
-          <div className="mt-4 sm:mt-6 rounded-xl border border-cyan-400/30 bg-cyan-400/5 p-4 sm:p-6 md:p-8">
+          <div className="mt-6 rounded-xl border border-cyan-400/30 bg-cyan-400/5 p-4 sm:p-6 md:p-8">
             <div className="flex items-center gap-2 mb-4">
-              <MessageCircleQuestion size={18} className="text-cyan-400" />
-              <h2 className="text-lg font-bold text-cyan-400">Answer from the Mufti</h2>
+              <div className="h-8 w-8 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                <MessageCircleQuestion size={16} className="text-cyan-400" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-cyan-400">Answer from the Scholar</h2>
+                <p className="text-[10px] text-muted-foreground/70">
+                  {new Date(question.adminAnswer.answeredAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </p>
+              </div>
             </div>
             <div className="prose-dark">
               <Markdown remarkPlugins={[remarkGfm]}>{question.adminAnswer.content}</Markdown>
             </div>
-            <p className="mt-4 text-[10px] text-muted-foreground/70">
-              Answered on {new Date(question.adminAnswer.answeredAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-            </p>
           </div>
         )}
 
         {!question.adminAnswer && (
-          <div className="mt-4 sm:mt-6 rounded-xl border border-dashed border-white/10 p-6 sm:p-8 text-center text-muted-foreground">
+          <div className="mt-6 rounded-xl border border-dashed border-white/10 p-6 sm:p-8 text-center text-muted-foreground">
             <Clock size={32} className="mx-auto mb-3 text-muted-foreground/50" />
-            <p className="text-sm">This question is awaiting an answer from our scholars.</p>
+            <p className="text-sm font-medium">Awaiting Answer</p>
+            <p className="mt-1 text-xs text-muted-foreground/70">This question is awaiting a response from our scholars.</p>
           </div>
         )}
+
+        {/* Discussion / Comments Section */}
+        <div className="mt-8 border-t border-white/10 pt-8">
+          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+            <User size={18} className="text-muted-foreground" />
+            Discussion
+          </h2>
+          <QuestionComments questionId={question.id} />
+        </div>
       </div>
     </div>
   );

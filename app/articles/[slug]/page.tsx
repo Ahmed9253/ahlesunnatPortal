@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { getDb } from '@/lib/mongodb';
 import { stripMongoId } from '@/lib/types';
 import type { Article } from '@/lib/types';
-import { Star, Calendar, Eye, ArrowLeft } from 'lucide-react';
+import { Star, Calendar, Eye, ArrowLeft, BookOpen } from 'lucide-react';
 import Markdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ArticleComments from '@/components/articles/article-comments';
@@ -53,7 +53,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
         <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
           <span className="flex items-center gap-1.5"><Calendar size={14} /> {new Date(data.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
           <span className="flex items-center gap-1.5"><Eye size={14} /> {data.views} views</span>
-          <span>By {data.authorName}</span>
+          <span className="flex items-center gap-1.5"><BookOpen size={14} /> By {data.authorName}</span>
         </div>
 
         {data.excerpt && <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground border-l-2 border-cyan-400 pl-3 sm:pl-4">{data.excerpt}</p>}

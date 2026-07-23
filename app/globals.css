@@ -133,9 +133,11 @@
 
 .prose-dark {
   color: #d4d4d8;
-  line-height: 1.75;
+  line-height: 1.8;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
-.prose-dark h1, .prose-dark h2, .prose-dark h3, .prose-dark h4 {
+.prose-dark h1, .prose-dark h2, .prose-dark h3, .prose-dark h4, .prose-dark h5, .prose-dark h6 {
   color: #fafafa;
   font-weight: 700;
   margin-top: 1.5em;
@@ -144,11 +146,21 @@
 .prose-dark h1 { font-size: 2rem; }
 .prose-dark h2 { font-size: 1.5rem; }
 .prose-dark h3 { font-size: 1.25rem; }
+.prose-dark h4 { font-size: 1.125rem; }
+.prose-dark h5 { font-size: 1rem; }
+.prose-dark h6 { font-size: 0.875rem; }
 .prose-dark p { margin-bottom: 1em; }
+.prose-dark strong { color: #fafafa; font-weight: 700; }
+.prose-dark em { font-style: italic; }
 .prose-dark a { color: #06b6d4; text-decoration: underline; }
 .prose-dark a:hover { color: #22d3ee; }
 .prose-dark ul, .prose-dark ol { padding-left: 1.5em; margin-bottom: 1em; }
 .prose-dark li { margin-bottom: 0.25em; }
+.prose-dark hr {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin: 2em 0;
+}
 .prose-dark blockquote {
   border-left: 3px solid #06b6d4;
   padding-left: 1em;
@@ -178,6 +190,8 @@
   width: 100%;
   border-collapse: collapse;
   margin: 1.5em 0;
+  overflow-x: auto;
+  display: block;
 }
 .prose-dark th, .prose-dark td {
   border: 1px solid rgba(255,255,255,0.08);
@@ -187,9 +201,12 @@
 .prose-dark th {
   background: rgba(255,255,255,0.04);
   font-weight: 600;
+  color: #fafafa;
 }
 .prose-dark img {
   border-radius: 0.5rem;
   max-width: 100%;
   margin: 1.5em 0;
 }
+.prose-dark > *:first-child { margin-top: 0; }
+.prose-dark > *:last-child { margin-bottom: 0; }

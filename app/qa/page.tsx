@@ -39,15 +39,29 @@ export default async function QAForumPage({ searchParams }: { searchParams: Prom
           </Link>
         </div>
 
-        <div className="mb-6 sm:mb-8 flex flex-wrap gap-1.5 sm:gap-2">
+        {/* Category filters */}
+        <div className="mb-4 flex flex-wrap gap-1.5 sm:gap-2">
           <Link href="/qa" className={`cursor-pointer rounded-lg px-4 py-1.5 text-xs font-bold transition-colors ${!params.category || params.category === 'All' ? 'bg-cyan-500 text-zinc-950' : 'border border-white/15 text-muted-foreground hover:border-cyan-400'}`}>
             All
           </Link>
           {QUESTION_CATEGORIES.map((cat) => (
-            <Link key={cat} href={`/qa?category=${cat}`} className={`cursor-pointer rounded-lg px-4 py-1.5 text-xs font-bold transition-colors ${params.category === cat ? 'bg-cyan-500 text-zinc-950' : 'border border-white/15 text-muted-foreground hover:border-cyan-400'}`}>
+            <Link key={cat} href={`/qa?category=${cat}&${params.status ? `status=${params.status}` : ''}`} className={`cursor-pointer rounded-lg px-4 py-1.5 text-xs font-bold transition-colors ${params.category === cat ? 'bg-cyan-500 text-zinc-950' : 'border border-white/15 text-muted-foreground hover:border-cyan-400'}`}>
               {cat}
             </Link>
           ))}
+        </div>
+
+        {/* Status filters */}
+        <div className="mb-6 sm:mb-8 flex flex-wrap gap-1.5 sm:gap-2">
+          <Link href={`/qa?${params.category ? `category=${params.category}&` : ''}status=All`} className={`cursor-pointer rounded-lg px-4 py-1.5 text-xs font-bold transition-colors ${!params.status || params.status === 'All' ? 'bg-white/10 text-foreground' : 'border border-white/15 text-muted-foreground hover:border-cyan-400'}`}>
+            All Status
+          </Link>
+          <Link href={`/qa?${params.category ? `category=${params.category}&` : ''}status=answered`} className={`cursor-pointer flex items-center gap-1 rounded-lg px-4 py-1.5 text-xs font-bold transition-colors ${params.status === 'answered' ? 'bg-emerald-500/20 text-emerald-400' : 'border border-white/15 text-muted-foreground hover:border-cyan-400'}`}>
+            <CheckCircle size={10} /> Answered
+          </Link>
+          <Link href={`/qa?${params.category ? `category=${params.category}&` : ''}status=pending`} className={`cursor-pointer flex items-center gap-1 rounded-lg px-4 py-1.5 text-xs font-bold transition-colors ${params.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 'border border-white/15 text-muted-foreground hover:border-cyan-400'}`}>
+            <Clock size={10} /> Pending
+          </Link>
         </div>
 
         {questions.length === 0 ? (
