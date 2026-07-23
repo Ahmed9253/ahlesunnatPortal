@@ -13,7 +13,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  Trash2,
   Pencil,
   Save,
   X,
@@ -379,6 +378,9 @@ function ArticlesTab() {
     {
       id: string;
       title: string;
+      excerpt: string;
+      content: string;
+      coverImage: string;
       category: string;
       starred: boolean;
       publishedAt: string;
@@ -559,12 +561,12 @@ function ArticlesTab() {
             )}
           </div>
           <textarea
-            placeholder="Content (Markdown supported)"
+            placeholder="Write your article content here..."
             value={form.content}
             onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-            rows={10}
+            rows={12}
             required
-            className="w-full rounded-lg border border-white/10 bg-card px-4 py-3 text-sm text-foreground placeholder-muted-foreground/50 outline-none focus:border-cyan-400 resize-none font-mono transition-colors"
+            className="w-full rounded-lg border border-white/10 bg-card px-4 py-3 text-sm text-foreground placeholder-muted-foreground/50 outline-none focus:border-cyan-400 resize-y leading-relaxed transition-colors"
           />
           {msg && (
             <p className={`text-sm ${msg.includes('!') ? 'text-emerald-400' : 'text-red-400'}`}>{msg}</p>
@@ -608,17 +610,17 @@ function ArticlesTab() {
                   setEditing({
                     id: a.id,
                     title: a.title,
-                    excerpt: '',
-                    content: '',
-                    coverImage: '',
+                    excerpt: a.excerpt || '',
+                    content: a.content || '',
+                    coverImage: a.coverImage || '',
                     category: a.category,
                   });
                   setShowForm(true);
                   setForm({
                     title: a.title,
-                    excerpt: '',
-                    content: '',
-                    coverImage: '',
+                    excerpt: a.excerpt || '',
+                    content: a.content || '',
+                    coverImage: a.coverImage || '',
                     category: a.category,
                   });
                 }}
@@ -631,8 +633,7 @@ function ArticlesTab() {
                 onClick={() => handleDelete(a.id)}
                     className="flex cursor-pointer items-center gap-1.5 rounded-lg px-2 sm:px-3 py-1.5 text-[10px] sm:text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors"
               >
-                <Trash2 size={12} />
-                <span className="hidden sm:inline">Delete</span>
+                Delete
               </button>
               </div>
             </div>
@@ -753,7 +754,7 @@ function QuestionsTab() {
                     onClick={() => handleDelete(q.id)}
                 className="flex cursor-pointer items-center gap-1.5 rounded-lg px-2 sm:px-3 py-1.5 text-[10px] sm:text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors"
                   >
-                    <Trash2 size={12} />
+                    Delete
                   </button>
                 </div>
               </div>
@@ -865,8 +866,7 @@ function UsersTab() {
                 onClick={() => handleDelete(u.id)}
                 className="flex cursor-pointer items-center gap-1 rounded-lg px-2 sm:px-3 py-1.5 text-[10px] sm:text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors shrink-0"
               >
-                <Trash2 size={12} />
-                <span className="hidden sm:inline">Delete</span>
+                Delete
               </button>
             </div>
           ))

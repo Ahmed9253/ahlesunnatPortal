@@ -4,8 +4,6 @@ import { getDb } from '@/lib/mongodb';
 import { stripMongoId } from '@/lib/types';
 import type { Article } from '@/lib/types';
 import { Star, Calendar, Eye, ArrowLeft, BookOpen } from 'lucide-react';
-import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import ArticleComments from '@/components/articles/article-comments';
 import ZoomableImage from '@/components/ui/zoomable-image';
 
@@ -58,8 +56,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
         {data.excerpt && <p className="mt-4 sm:mt-6 text-base sm:text-lg text-muted-foreground border-l-2 border-cyan-400 pl-3 sm:pl-4">{data.excerpt}</p>}
 
-        <article className="prose-dark mt-8">
-          <Markdown remarkPlugins={[remarkGfm]}>{data.content}</Markdown>
+        <article className="mt-8 space-y-4">
+          {data.content.split('\n\n').map((paragraph, i) => (
+            <p key={i} className="text-base sm:text-lg leading-relaxed text-foreground/90">
+              {paragraph}
+            </p>
+          ))}
         </article>
 
         <div className="mt-12 border-t border-white/10 pt-8">

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/layout/auth-provider';
 import type { Comment } from '@/lib/types';
-import { Star, Trash2, MessageCircle } from 'lucide-react';
+import { Star, MessageCircle } from 'lucide-react';
 
 export default function ArticleComments({ articleId }: { articleId: string }) {
   const { user } = useAuth();

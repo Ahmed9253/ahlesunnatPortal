@@ -56,7 +56,10 @@ export async function PUT(req: NextRequest) {
   const setFields: Record<string, unknown> = { updatedAt: new Date().toISOString() };
   if (title !== undefined) {
     setFields.title = title.trim();
-    setFields.slug = makeSlug(title);
+    const newSlug = makeSlug(title);
+    const existing = await db.collection('articles').countDocuments({ slug: newSlug, id: { $ne: id } });
+    if (existing) return NextResponse.json({ error: 'An article with this title already exists' }, { status: 400 });
+    setFields.slug = newSlug;
   }
   if (excerpt !== undefined) setFields.excerpt = excerpt.trim();
   if (content !== undefined) setFields.content = content;
