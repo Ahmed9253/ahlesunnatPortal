@@ -21,6 +21,8 @@ import {
   Send,
   RefreshCw,
 } from 'lucide-react';
+import { toast } from 'sonner';
+import ConfirmDialog from '@/components/ui/confirm-dialog';
 
 type Stats = {
   totalArticles: number;
@@ -404,7 +406,7 @@ function ArticlesTab() {
     category: 'General',
   });
   const [saving, setSaving] = useState(false);
-  const [msg, setMsg] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = () =>
     fetch('/api/admin/stats')
@@ -424,7 +426,6 @@ function ArticlesTab() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setMsg('');
     try {
       if (editing) {
         const res = await fetch('/api/admin/articles', {
@@ -433,13 +434,13 @@ function ArticlesTab() {
           body: JSON.stringify({ id: editing.id, ...form }),
         });
         if (res.ok) {
-          setMsg('Article updated!');
+          toast.success('Article updated successfully!');
           setEditing(null);
           setShowForm(false);
           load();
         } else {
           const d = await res.json();
-          setMsg(d.error || 'Failed');
+          toast.error(d.error || 'Failed to update article');
         }
       } else {
         const res = await fetch('/api/admin/articles', {
@@ -448,13 +449,13 @@ function ArticlesTab() {
           body: JSON.stringify(form),
         });
         if (res.ok) {
-          setMsg('Article created!');
+          toast.success('Article created successfully!');
           setShowForm(false);
           setForm({ title: '', excerpt: '', content: '', coverImage: '', category: 'General' });
           load();
         } else {
           const d = await res.json();
-          setMsg(d.error || 'Failed');
+          toast.error(d.error || 'Failed to create article');
         }
       }
     } finally {
@@ -462,9 +463,11 @@ function ArticlesTab() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this article?')) return;
-    await fetch(`/api/admin/articles?id=${id}`, { method: 'DELETE' });
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    await fetch(`/api/admin/articles?id=${deletingId}`, { method: 'DELETE' });
+    toast.success('Article deleted!');
+    setDeletingId(null);
     load();
   };
 
@@ -568,9 +571,6 @@ function ArticlesTab() {
             required
             className="w-full rounded-lg border border-white/10 bg-card px-4 py-3 text-sm text-foreground placeholder-muted-foreground/50 outline-none focus:border-cyan-400 resize-y leading-relaxed transition-colors"
           />
-          {msg && (
-            <p className={`text-sm ${msg.includes('!') ? 'text-emerald-400' : 'text-red-400'}`}>{msg}</p>
-          )}
           <button
             disabled={saving}
             className="flex cursor-pointer items-center gap-2 rounded-lg bg-cyan-500 px-6 py-3 text-sm font-bold text-zinc-950 hover:bg-cyan-400 disabled:opacity-40 transition-colors"
@@ -630,7 +630,7 @@ function ArticlesTab() {
                 <span className="hidden sm:inline">Edit</span>
               </button>
               <button
-                onClick={() => handleDelete(a.id)}
+                onClick={() => setDeletingId(a.id)}
                     className="flex cursor-pointer items-center gap-1.5 rounded-lg px-2 sm:px-3 py-1.5 text-[10px] sm:text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors"
               >
                 Delete
@@ -640,6 +640,14 @@ function ArticlesTab() {
           ))
         )}
       </div>
+      <ConfirmDialog
+        open={!!deletingId}
+        title="Delete Article"
+        message="Are you sure you want to delete this article? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setDeletingId(null)}
+      />
     </div>
   );
 }
@@ -661,6 +669,7 @@ function QuestionsTab() {
   const [answering, setAnswering] = useState<string | null>(null);
   const [answer, setAnswer] = useState('');
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = () =>
     fetch('/api/questions?limit=100')
@@ -681,9 +690,12 @@ function QuestionsTab() {
         body: JSON.stringify({ answer }),
       });
       if (res.ok) {
+        toast.success('Answer submitted successfully!');
         setAnswering(null);
         setAnswer('');
         load();
+      } else {
+        toast.error('Failed to submit answer');
       }
     } finally {
       setSaving(false);
@@ -699,9 +711,11 @@ function QuestionsTab() {
     load();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this question?')) return;
-    await fetch(`/api/admin/questions/${id}`, { method: 'DELETE' });
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    await fetch(`/api/admin/questions/${deletingId}`, { method: 'DELETE' });
+    toast.success('Question deleted!');
+    setDeletingId(null);
     load();
   };
 
@@ -751,7 +765,7 @@ function QuestionsTab() {
                     <Star size={14} className={q.starred ? 'fill-current' : ''} />
                   </button>
                   <button
-                    onClick={() => handleDelete(q.id)}
+                    onClick={() => setDeletingId(q.id)}
                 className="flex cursor-pointer items-center gap-1.5 rounded-lg px-2 sm:px-3 py-1.5 text-[10px] sm:text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors"
                   >
                     Delete
@@ -812,6 +826,14 @@ function QuestionsTab() {
           ))
         )}
       </div>
+      <ConfirmDialog
+        open={!!deletingId}
+        title="Delete Question"
+        message="Are you sure you want to delete this question? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setDeletingId(null)}
+      />
     </div>
   );
 }
@@ -820,6 +842,7 @@ function UsersTab() {
   const [users, setUsers] = useState<
     { id: string; name: string; email: string; createdAt: string; bio: string }[]
   >([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/users')
@@ -828,10 +851,12 @@ function UsersTab() {
       .catch(() => {});
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this user and all their content?')) return;
-    await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' });
-    setUsers(u => u.filter(x => x.id !== id));
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    await fetch(`/api/admin/users?id=${deletingId}`, { method: 'DELETE' });
+    toast.success('User deleted!');
+    setUsers(u => u.filter(x => x.id !== deletingId));
+    setDeletingId(null);
   };
 
   return (
@@ -863,7 +888,7 @@ function UsersTab() {
                 {new Date(u.createdAt).toLocaleDateString()}
               </span>
               <button
-                onClick={() => handleDelete(u.id)}
+                onClick={() => setDeletingId(u.id)}
                 className="flex cursor-pointer items-center gap-1 rounded-lg px-2 sm:px-3 py-1.5 text-[10px] sm:text-xs font-semibold text-red-400 hover:bg-red-500/10 transition-colors shrink-0"
               >
                 Delete
@@ -872,6 +897,14 @@ function UsersTab() {
           ))
         )}
       </div>
+      <ConfirmDialog
+        open={!!deletingId}
+        title="Delete User"
+        message="Are you sure you want to delete this user and all their content? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setDeletingId(null)}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { AuthProvider } from "@/components/layout/auth-provider";
 import SiteNav from "@/components/layout/site-nav";
 import SiteFooter from "@/components/layout/site-footer";
 import LoadingScreen from "@/components/layout/loading-screen";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -33,6 +34,16 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground">
         <AuthProvider>
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              style: {
+                background: '#18181b',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: '#fafafa',
+              },
+            }}
+          />
           <LoadingScreen />
           <SiteNav />
           <main className="flex-1">{children}</main>
