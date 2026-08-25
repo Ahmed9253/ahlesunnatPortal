@@ -13,6 +13,7 @@ export default function SiteFooter() {
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-muted-foreground">
             <Link href="/articles" className="cursor-pointer hover:text-foreground transition-colors">Articles</Link>
             <Link href="/qa" className="cursor-pointer hover:text-foreground transition-colors">Q&A Forum</Link>
+            <Link href="/about" className="cursor-pointer hover:text-foreground transition-colors">About</Link>
             <Link href="/login" className="cursor-pointer hover:text-foreground transition-colors">Login</Link>
             <Link href="/admin" className="cursor-pointer flex items-center gap-1 hover:text-foreground transition-colors">
               <Shield size={14} /> Admin

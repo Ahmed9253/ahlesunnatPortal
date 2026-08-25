@@ -83,6 +83,25 @@ export type QuestionCategory = 'Fiqh' | 'Aqeedah' | 'Tafseer' | 'Hadith' | 'Seer
 
 export const QUESTION_CATEGORIES: QuestionCategory[] = ['Fiqh', 'Aqeedah', 'Tafseer', 'Hadith', 'Seerah', 'General'];
 
+export type AboutContent = {
+  _id?: ObjectId;
+  key: 'about';
+  title: string;
+  intro: string;
+  content: string;
+  image: string;
+  updatedAt: string;
+};
+
+export const DEFAULT_ABOUT: Omit<AboutContent, '_id'> = {
+  key: 'about',
+  title: 'About Us',
+  intro: '',
+  content: '',
+  image: '',
+  updatedAt: '',
+};
+
 export function stripMongoId<T extends { _id?: unknown }>(doc: T): Omit<T, '_id'> {
   const copy = { ...doc } as Record<string, unknown>;
   delete copy._id;

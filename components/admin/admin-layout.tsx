@@ -20,6 +20,7 @@ import {
   TrendingUp,
   Send,
   RefreshCw,
+  Info,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
@@ -35,7 +36,7 @@ type Stats = {
   starredQuestions: number;
 };
 
-type Tab = 'dashboard' | 'articles' | 'questions' | 'users';
+type Tab = 'dashboard' | 'articles' | 'questions' | 'users' | 'about';
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState<Tab>('dashboard');
@@ -57,6 +58,7 @@ export default function AdminDashboard() {
     { id: 'articles', label: 'Articles', icon: <FileText size={18} /> },
     { id: 'questions', label: 'Questions', icon: <MessageCircleQuestion size={18} /> },
     { id: 'users', label: 'Users', icon: <Users size={18} /> },
+    { id: 'about', label: 'About', icon: <Info size={18} /> },
   ];
 
   const handleNavClick = (id: Tab) => {
@@ -83,27 +85,27 @@ export default function AdminDashboard() {
       </button>
 
       <aside
-        className={`shrink-0 border-r border-white/10 bg-card/80 transition-all duration-300
+        className={`shrink-0 overflow-hidden border-r border-white/10 bg-card/80 transition-[width,transform] duration-300 ease-in-out
           fixed inset-y-0 left-0 z-50 md:static md:z-auto
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
           ${collapsed ? 'w-16' : 'w-56'}`}
       >
-        <div className="flex h-full flex-col">
+        <div className="flex h-full w-full flex-col">
           <div className="flex items-center justify-between border-b border-white/10 px-3 py-4">
             {!collapsed && (
-              <span className="text-sm font-bold tracking-wide text-cyan-400">
+              <span className="whitespace-nowrap text-sm font-bold tracking-wide text-cyan-400">
                 Admin Panel
               </span>
             )}
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="cursor-pointer rounded-lg p-1.5 text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors hidden md:block"
+              className="shrink-0 cursor-pointer rounded-lg p-1.5 text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors hidden md:block"
             >
               {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
             </button>
             <button
               onClick={() => setMobileOpen(false)}
-              className="cursor-pointer rounded-lg p-1.5 text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors md:hidden"
+              className="shrink-0 cursor-pointer rounded-lg p-1.5 text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors md:hidden"
             >
               <X size={16} />
             </button>
@@ -113,24 +115,24 @@ export default function AdminDashboard() {
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
-                className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${
+                className={`flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${
                   tab === item.id
                     ? 'bg-cyan-500 text-zinc-950 shadow-lg shadow-cyan-500/20'
                     : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
                 }`}
               >
-                {item.icon}
-                {!collapsed && <span>{item.label}</span>}
+                <span className="shrink-0">{item.icon}</span>
+                {!collapsed && <span className="whitespace-nowrap">{item.label}</span>}
               </button>
             ))}
           </nav>
           <div className="border-t border-white/10 p-2">
             <button
               onClick={logout}
-              className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-muted-foreground hover:bg-red-500/10 hover:text-red-400 transition-colors"
+              className="flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg px-3 py-2.5 text-sm font-semibold text-muted-foreground hover:bg-red-500/10 hover:text-red-400 transition-colors"
             >
-              <LogOut size={18} />
-              {!collapsed && <span>Logout</span>}
+              <span className="shrink-0"><LogOut size={18} /></span>
+              {!collapsed && <span className="whitespace-nowrap">Logout</span>}
             </button>
           </div>
         </div>
@@ -141,6 +143,7 @@ export default function AdminDashboard() {
         {tab === 'articles' && <ArticlesTab />}
         {tab === 'questions' && <QuestionsTab />}
         {tab === 'users' && <UsersTab />}
+        {tab === 'about' && <AboutTab />}
       </main>
     </div>
   );
@@ -905,6 +908,142 @@ function UsersTab() {
         onConfirm={handleDelete}
         onCancel={() => setDeletingId(null)}
       />
+    </div>
+  );
+}
+
+function AboutTab() {
+  const [form, setForm] = useState({ title: 'About Us', intro: '', content: '', image: '' });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/about')
+      .then(r => r.json())
+      .then(d => {
+        if (d.about) {
+          setForm({
+            title: d.about.title || 'About Us',
+            intro: d.about.intro || '',
+            content: d.about.content || '',
+            image: d.about.image || '',
+          });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await fetch('/api/admin/about', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        toast.success('About page updated successfully!');
+      } else {
+        const d = await res.json();
+        toast.error(d.error || 'Failed to update About page');
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-32 text-zinc-500">
+      <RefreshCw size={20} className="animate-spin mr-2" />
+      Loading About content...
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-8">
+        <Info size={24} className="text-cyan-400" />
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">About Page</h2>
+      </div>
+
+      <form onSubmit={handleSave} className="rounded-xl border border-white/10 bg-card/80 p-6 space-y-4 max-w-3xl">
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Page Title</label>
+          <input
+            placeholder="About Us"
+            value={form.title}
+            onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+            required
+            className="w-full rounded-lg border border-white/10 bg-card px-4 py-3 text-sm text-foreground placeholder-muted-foreground/50 outline-none focus:border-cyan-400 transition-colors"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Intro / Subtitle</label>
+          <input
+            placeholder="A short introductory line shown below the title"
+            value={form.intro}
+            onChange={e => setForm(f => ({ ...f, intro: e.target.value }))}
+            className="w-full rounded-lg border border-white/10 bg-card px-4 py-3 text-sm text-foreground placeholder-muted-foreground/50 outline-none focus:border-cyan-400 transition-colors"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Cover Image</label>
+          <div className="flex gap-2">
+            <input
+              placeholder="Image URL (or upload)"
+              value={form.image}
+              onChange={e => setForm(f => ({ ...f, image: e.target.value }))}
+              className="flex-1 rounded-lg border border-white/10 bg-card px-4 py-3 text-sm text-foreground placeholder-muted-foreground/50 outline-none focus:border-cyan-400 transition-colors"
+            />
+            <label className="shrink-0 flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-card px-4 py-3 text-xs font-semibold text-muted-foreground hover:border-cyan-400 hover:text-foreground transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Upload
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const fd = new FormData();
+                  fd.append('file', file);
+                  const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+                  if (res.ok) {
+                    const d = await res.json();
+                    setForm(f => ({ ...f, image: d.url }));
+                  }
+                }}
+              />
+            </label>
+          </div>
+          {form.image && (
+            <img src={form.image} alt="About preview" className="mt-2 h-24 rounded-lg object-cover" />
+          )}
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Content</label>
+          <textarea
+            placeholder="Write the About page content here... Separate paragraphs with a blank line."
+            value={form.content}
+            onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
+            rows={14}
+            className="w-full rounded-lg border border-white/10 bg-card px-4 py-3 text-sm text-foreground placeholder-muted-foreground/50 outline-none focus:border-cyan-400 resize-y leading-relaxed transition-colors"
+          />
+        </div>
+
+        <button
+          disabled={saving}
+          className="flex cursor-pointer items-center gap-2 rounded-lg bg-cyan-500 px-6 py-3 text-sm font-bold text-zinc-950 hover:bg-cyan-400 disabled:opacity-40 transition-colors"
+        >
+          <Save size={14} />
+          {saving ? 'Saving...' : 'Save About Page'}
+        </button>
+      </form>
     </div>
   );
 }

@@ -1,24 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const CANDIDATES = ['/hero.png', '/hero2.png', '/hero3.png', '/hero4.png', '/hero5.png'];
-
-export default function HeroCarousel() {
+export default function HeroCarousel({ images }: { images: string[] }) {
   const [current, setCurrent] = useState(0);
-  const [images, setImages] = useState<string[]>([]);
-
-  useEffect(() => {
-    const found: string[] = [];
-    let checks = 0;
-    CANDIDATES.forEach(src => {
-      const img = new Image();
-      img.onload = () => { found.push(src); checks++; if (checks === CANDIDATES.length) setImages([...found].sort((a, b) => a.localeCompare(b))); };
-      img.onerror = () => { checks++; if (checks === CANDIDATES.length) setImages([...found].sort((a, b) => a.localeCompare(b))); };
-      img.src = src;
-    });
-  }, []);
 
   const next = useCallback(() => {
     setCurrent(c => (c + 1) % images.length);
@@ -56,9 +42,11 @@ export default function HeroCarousel() {
         </div>
       ))}
 
-      {/* Dark gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent" />
+      {/* Left dark-blur panel: blurs the image behind the text, fading out around the middle */}
+      <div className="pointer-events-none absolute inset-0 backdrop-blur-md [mask-image:linear-gradient(to_right,black,black_30%,transparent_60%)] [-webkit-mask-image:linear-gradient(to_right,black,black_30%,transparent_60%)]" />
+      {/* Dark gradients for text legibility */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 via-45% to-transparent to-70%" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
 
       {/* Navigation arrows */}
       {images.length > 1 && (

@@ -10,6 +10,7 @@ const links = [
   { href: '/', label: 'Home' },
   { href: '/articles', label: 'Articles' },
   { href: '/qa', label: 'Q&A Forum' },
+  { href: '/about', label: 'About' },
 ];
 
 export default function SiteNav() {
@@ -44,23 +45,23 @@ export default function SiteNav() {
         <div className="hidden items-center gap-2 md:flex">
           {user ? (
             <>
-              <Link href="/ask" className="cursor-pointer rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-bold text-zinc-950 hover:bg-cyan-400">
+              <Link href="/ask" className="cursor-pointer rounded-full bg-cyan-500 px-4 py-1.5 text-xs font-bold text-zinc-950 shadow-md shadow-cyan-500/25 hover:bg-cyan-400 hover:shadow-cyan-400/40 transition-all">
                 Ask Question
               </Link>
-              <Link href="/profile" className="cursor-pointer flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">
+              <Link href="/profile" className="cursor-pointer flex items-center gap-2 rounded-full px-3 py-1.5 text-sm text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors">
                 <User size={16} />
                 {user.name}
               </Link>
-              <button onClick={logout} className="cursor-pointer rounded-lg p-2 text-muted-foreground hover:text-red-400">
+              <button onClick={logout} className="cursor-pointer rounded-full p-2 text-muted-foreground hover:bg-white/10 hover:text-red-400 transition-colors">
                 <LogOut size={16} />
               </button>
             </>
           ) : (
             <>
-              <Link href="/login" className="cursor-pointer rounded-lg px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">
+              <Link href="/login" className="cursor-pointer rounded-full px-4 py-1.5 text-sm text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors">
                 Login
               </Link>
-              <Link href="/register" className="cursor-pointer rounded-lg bg-cyan-500 px-3 py-1.5 text-xs font-bold text-zinc-950 hover:bg-cyan-400">
+              <Link href="/register" className="cursor-pointer rounded-full bg-cyan-500 px-4 py-1.5 text-xs font-bold text-zinc-950 shadow-md shadow-cyan-500/25 hover:bg-cyan-400 hover:shadow-cyan-400/40 transition-all">
                 Register
               </Link>
             </>
@@ -90,7 +91,7 @@ export default function SiteNav() {
             <hr className="my-2 border-white/10" />
             {user ? (
               <>
-                <Link href="/ask" onClick={() => setOpen(false)} className="cursor-pointer rounded-lg bg-cyan-500 px-3 py-2.5 text-center text-xs font-bold text-zinc-950">
+                <Link href="/ask" onClick={() => setOpen(false)} className="cursor-pointer rounded-full bg-cyan-500 px-3 py-2.5 text-center text-xs font-bold text-zinc-950 shadow-md shadow-cyan-500/25">
                   Ask Question
                 </Link>
                 <Link href="/profile" onClick={() => setOpen(false)} className="cursor-pointer rounded-lg px-3 py-2.5 text-sm text-muted-foreground">
@@ -105,7 +106,7 @@ export default function SiteNav() {
                 <Link href="/login" onClick={() => setOpen(false)} className="cursor-pointer rounded-lg px-3 py-2.5 text-sm text-muted-foreground">
                   Login
                 </Link>
-                <Link href="/register" onClick={() => setOpen(false)} className="cursor-pointer rounded-lg bg-cyan-500 px-3 py-2.5 text-center text-xs font-bold text-zinc-950">
+                <Link href="/register" onClick={() => setOpen(false)} className="cursor-pointer rounded-full bg-cyan-500 px-3 py-2.5 text-center text-xs font-bold text-zinc-950 shadow-md shadow-cyan-500/25">
                   Register
                 </Link>
               </>
