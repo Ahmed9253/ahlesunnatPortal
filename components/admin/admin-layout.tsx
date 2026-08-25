@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import {
   LayoutDashboard,
   FileText,
@@ -184,21 +184,39 @@ function BarChart({
   title: string;
   colors: string[];
 }) {
+  const uid = useId().replace(/:/g, '');
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   const max = Math.max(...data.map(d => d.value), 1);
   const barWidth = 48;
-  const gap = 24;
+  const gap = 28;
   const chartHeight = 180;
   const totalWidth = data.length * (barWidth + gap) + gap;
-  const labelOffset = 60;
+  const labelOffset = 46;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-card/80 p-6">
+    <div className="rounded-2xl border border-white/10 bg-card/80 p-5 sm:p-6">
       <div className="flex items-center gap-2 mb-6">
         <BarChart3 size={18} className="text-cyan-400" />
         <h3 className="text-sm font-bold text-foreground">{title}</h3>
       </div>
       <div className="overflow-x-auto">
-        <svg viewBox={`0 0 ${totalWidth} ${chartHeight + labelOffset}`} className="w-full min-w-[300px]" role="img">
+        <svg viewBox={`0 0 ${totalWidth} ${chartHeight + labelOffset}`} className="w-full min-w-[280px]" role="img" aria-label={title}>
+          <defs>
+            {data.map((_, i) => {
+              const color = colors[i % colors.length];
+              return (
+                <linearGradient key={i} id={`bar-${uid}-${i}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={color} stopOpacity={1} />
+                  <stop offset="100%" stopColor={color} stopOpacity={0.45} />
+                </linearGradient>
+              );
+            })}
+          </defs>
           {/* Horizontal grid lines */}
           {[0.25, 0.5, 0.75, 1].map(frac => (
             <line
@@ -216,15 +234,35 @@ function BarChart({
             const barH = (d.value / max) * chartHeight;
             const x = gap + i * (barWidth + gap);
             const y = chartHeight - barH + 10;
-            const color = colors[i % colors.length];
             return (
               <g key={d.label}>
-                <rect x={x} y={y} width={barWidth} height={barH} rx={8} fill={color} opacity={0.9} />
-                <rect x={x} y={y} width={barWidth} height={Math.min(barH, 16)} rx={8} fill="white" opacity={0.15} />
-                <text x={x + barWidth / 2} y={y - 8} textAnchor="middle" fill="white" fontSize={13} fontWeight={700}>
+                <rect
+                  x={x}
+                  y={y}
+                  width={barWidth}
+                  height={barH}
+                  rx={10}
+                  fill={`url(#bar-${uid}-${i})`}
+                  style={{
+                    transform: mounted ? 'scaleY(1)' : 'scaleY(0)',
+                    transformBox: 'fill-box',
+                    transformOrigin: 'bottom',
+                    transition: `transform 0.8s cubic-bezier(0.22,1,0.36,1) ${i * 0.08}s`,
+                  }}
+                />
+                <rect x={x} y={y} width={barWidth} height={Math.min(barH, 14)} rx={10} fill="white" opacity={0.16} style={{ pointerEvents: 'none' }} />
+                <text
+                  x={x + barWidth / 2}
+                  y={y - 8}
+                  textAnchor="middle"
+                  fill="#f1f1f1"
+                  fontSize={13}
+                  fontWeight={700}
+                  style={{ opacity: mounted ? 1 : 0, transition: `opacity 0.4s ease ${0.3 + i * 0.08}s` }}
+                >
                   {d.value}
                 </text>
-                <text x={x + barWidth / 2} y={chartHeight + 30} textAnchor="middle" fill="#71717a" fontSize={10} fontWeight={500}>
+                <text x={x + barWidth / 2} y={chartHeight + 34} textAnchor="middle" fill="#a1a1aa" fontSize={11} fontWeight={500}>
                   {d.label}
                 </text>
               </g>
@@ -245,61 +283,93 @@ function DonutChart({
   title: string;
   colors: string[];
 }) {
-  const total = data.reduce((s, d) => s + d.value, 0) || 1;
-  const size = 160;
-  const strokeWidth = 28;
+  const uid = useId().replace(/:/g, '');
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setMounted(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  const total = data.reduce((s, d) => s + d.value, 0);
+  const size = 180;
+  const strokeWidth = 26;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  let cumulative = 0;
+
+  // Precompute segment offsets without mutating a render-scoped variable.
+  const segments = data.map((d, i) => {
+    const start = data.slice(0, i).reduce((sum, x) => sum + x.value, 0) / (total || 1);
+    const pct = d.value / (total || 1);
+    return { label: d.label, value: d.value, pct, start, color: colors[i % colors.length] };
+  });
 
   return (
-    <div className="rounded-xl border border-white/10 bg-card/80 p-6">
+    <div className="rounded-2xl border border-white/10 bg-card/80 p-5 sm:p-6">
       <div className="flex items-center gap-2 mb-6">
         <TrendingUp size={18} className="text-cyan-400" />
         <h3 className="text-sm font-bold text-foreground">{title}</h3>
       </div>
-      <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
-          <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="white" strokeOpacity={0.06} strokeWidth={strokeWidth} />
-          {data.map((d, i) => {
-            const pct = d.value / total;
-            const dashLen = pct * circumference;
-            const dashOffset = -cumulative * circumference;
-            cumulative += pct;
-            return (
-              <circle
-                key={d.label}
-                cx={size / 2}
-                cy={size / 2}
-                r={radius}
-                fill="none"
-                stroke={colors[i % colors.length]}
-                strokeWidth={strokeWidth}
-                strokeDasharray={`${dashLen} ${circumference - dashLen}`}
-                strokeDashoffset={dashOffset}
-                strokeLinecap="round"
-                transform={`rotate(-90 ${size / 2} ${size / 2})`}
-                opacity={0.9}
-              />
-            );
-          })}
-          <text x={size / 2} y={size / 2 - 4} textAnchor="middle" fill="white" fontSize={24} fontWeight={900}>
-            {total}
-          </text>
-          <text x={size / 2} y={size / 2 + 14} textAnchor="middle" fill="#71717a" fontSize={10} fontWeight={500}>
-            Total
-          </text>
-        </svg>
-        <div className="flex flex-wrap justify-center sm:flex-col sm:justify-start gap-3 sm:gap-2">
-          {data.map((d, i) => (
-            <div key={d.label} className="flex items-center gap-2 text-sm">
-              <span className="h-3 w-3 rounded-sm shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
-              <span className="text-muted-foreground">{d.label}</span>
-              <span className="ml-auto font-bold text-foreground">{d.value}</span>
-            </div>
-          ))}
+      {total === 0 ? (
+        <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">No data yet.</div>
+      ) : (
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
+          <svg viewBox={`0 0 ${size} ${size}`} className="h-40 w-40 shrink-0 sm:h-44 sm:w-44" style={{ overflow: 'visible' }} role="img" aria-label={title}>
+            <defs>
+              {segments.map((s, i) => (
+                <linearGradient key={i} id={`donut-${uid}-${i}`} x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor={s.color} stopOpacity={1} />
+                  <stop offset="100%" stopColor={s.color} stopOpacity={0.6} />
+                </linearGradient>
+              ))}
+              <filter id={`donut-glow-${uid}`} x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="white" strokeOpacity={0.06} strokeWidth={strokeWidth} />
+            <g filter={`url(#donut-glow-${uid})`}>
+              {segments.map((s, i) => {
+                const dashLen = mounted ? s.pct * circumference : 0;
+                return (
+                  <circle
+                    key={s.label}
+                    cx={size / 2}
+                    cy={size / 2}
+                    r={radius}
+                    fill="none"
+                    stroke={`url(#donut-${uid}-${i})`}
+                    strokeWidth={strokeWidth}
+                    strokeDasharray={`${dashLen} ${circumference - dashLen}`}
+                    strokeDashoffset={-s.start * circumference}
+                    strokeLinecap="butt"
+                    transform={`rotate(-90 ${size / 2} ${size / 2})`}
+                    style={{ transition: `stroke-dasharray 0.9s cubic-bezier(0.22,1,0.36,1) ${i * 0.12}s` }}
+                  />
+                );
+              })}
+            </g>
+            <text x={size / 2} y={size / 2 - 3} textAnchor="middle" fill="white" fontSize={26} fontWeight={900}>
+              {total}
+            </text>
+            <text x={size / 2} y={size / 2 + 16} textAnchor="middle" fill="#a1a1aa" fontSize={11} fontWeight={600} letterSpacing={1.5}>
+              TOTAL
+            </text>
+          </svg>
+          <div className="grid w-full grid-cols-2 gap-x-4 gap-y-2 sm:flex sm:flex-col sm:gap-2.5">
+            {segments.map((s, i) => (
+              <div key={s.label} className="flex items-center gap-2 text-sm">
+                <span className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: colors[i % colors.length] }} />
+                <span className="truncate text-muted-foreground">{s.label}</span>
+                <span className="ml-auto font-bold text-foreground">{s.value}</span>
+                <span className="w-9 shrink-0 text-right text-xs text-muted-foreground">{Math.round(s.pct * 100)}%</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -1100,7 +1170,7 @@ function AboutTab() {
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
                     {socialIcon(s.platform, 16)}
                   </span>
-                  <span className="w-24 shrink-0 truncate text-xs font-semibold text-muted-foreground">{s.platform}</span>
+                  <span className="w-16 shrink-0 truncate text-xs font-semibold text-muted-foreground sm:w-24">{s.platform}</span>
                   <input
                     placeholder="https://..."
                     value={s.url}
@@ -1375,32 +1445,34 @@ function DonationTab() {
               <div className="space-y-2">
                 <label className="block text-xs font-semibold text-muted-foreground">Details</label>
                 {account.fields.map((field, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
-                    <select
-                      value={DONATION_FIELD_LABELS.includes(field.label) ? field.label : 'Other'}
-                      onChange={e => updateField(account.id, idx, { label: e.target.value === 'Other' ? '' : e.target.value })}
-                      className={`${inputCls} sm:max-w-[180px]`}
-                    >
-                      {DONATION_FIELD_LABELS.map(l => <option key={l} value={l}>{l}</option>)}
-                    </select>
-                    {!DONATION_FIELD_LABELS.slice(0, -1).includes(field.label) && (
+                  <div key={idx} className="flex items-start gap-2">
+                    <div className="min-w-0 flex-1 space-y-2 sm:flex sm:items-center sm:gap-2 sm:space-y-0">
+                      <select
+                        value={DONATION_FIELD_LABELS.includes(field.label) ? field.label : 'Other'}
+                        onChange={e => updateField(account.id, idx, { label: e.target.value === 'Other' ? '' : e.target.value })}
+                        className={`${inputCls} sm:max-w-[180px]`}
+                      >
+                        {DONATION_FIELD_LABELS.map(l => <option key={l} value={l}>{l}</option>)}
+                      </select>
+                      {!DONATION_FIELD_LABELS.slice(0, -1).includes(field.label) && (
+                        <input
+                          placeholder="Label"
+                          value={field.label}
+                          onChange={e => updateField(account.id, idx, { label: e.target.value })}
+                          className={`${inputCls} sm:max-w-[160px]`}
+                        />
+                      )}
                       <input
-                        placeholder="Label"
-                        value={field.label}
-                        onChange={e => updateField(account.id, idx, { label: e.target.value })}
-                        className={`${inputCls} sm:max-w-[160px]`}
+                        placeholder="Value"
+                        value={field.value}
+                        onChange={e => updateField(account.id, idx, { value: e.target.value })}
+                        className={inputCls}
                       />
-                    )}
-                    <input
-                      placeholder="Value"
-                      value={field.value}
-                      onChange={e => updateField(account.id, idx, { value: e.target.value })}
-                      className={inputCls}
-                    />
+                    </div>
                     <button
                       type="button"
                       onClick={() => removeField(account.id, idx)}
-                      className="shrink-0 cursor-pointer rounded-lg border border-white/10 p-2 text-muted-foreground hover:border-red-400 hover:text-red-400 transition-colors"
+                      className="mt-0.5 shrink-0 cursor-pointer rounded-lg border border-white/10 p-2 text-muted-foreground hover:border-red-400 hover:text-red-400 transition-colors"
                       title="Remove field"
                     >
                       <X size={14} />

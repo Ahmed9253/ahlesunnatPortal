@@ -7,9 +7,37 @@ export default function LoadingScreen() {
   const [fade, setFade] = useState(false);
 
   useEffect(() => {
-    const fadeTimer = setTimeout(() => setFade(true), 3000);
-    const hideTimer = setTimeout(() => setShow(false), 3600);
-    return () => { clearTimeout(fadeTimer); clearTimeout(hideTimer); };
+    const MIN_MS = 5000;
+    const start = performance.now();
+    let started = false;
+    let fadeTimer: ReturnType<typeof setTimeout>;
+    let hideTimer: ReturnType<typeof setTimeout>;
+    let fallbackTimer: ReturnType<typeof setTimeout>;
+
+    // Hide once BOTH the minimum time has elapsed AND the page has finished loading.
+    const finish = () => {
+      if (started) return;
+      started = true;
+      clearTimeout(fallbackTimer);
+      const remaining = Math.max(0, MIN_MS - (performance.now() - start));
+      fadeTimer = setTimeout(() => setFade(true), remaining);
+      hideTimer = setTimeout(() => setShow(false), remaining + 600);
+    };
+
+    if (document.readyState === 'complete') {
+      finish();
+    } else {
+      window.addEventListener('load', finish, { once: true });
+      // Safety fallback: never hang forever if `load` is slow/never fires.
+      fallbackTimer = setTimeout(finish, 12000);
+    }
+
+    return () => {
+      window.removeEventListener('load', finish);
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   if (!show) return null;
