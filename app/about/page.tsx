@@ -2,10 +2,22 @@ import type { Metadata } from 'next';
 import { getDb } from '@/lib/mongodb';
 import { stripMongoId, DEFAULT_ABOUT, DEFAULT_DONATION } from '@/lib/types';
 import type { AboutContent, DonationContent } from '@/lib/types';
-import { Info, Heart } from 'lucide-react';
+import { Info, Heart, ThumbsUp, Camera, Play, AtSign, Globe, MessageCircle, Phone, Link2 } from 'lucide-react';
 import ZoomableImage from '@/components/ui/zoomable-image';
 
 export const dynamic = 'force-dynamic';
+
+function socialIcon(platform: string) {
+  switch (platform) {
+    case 'Facebook': return <ThumbsUp size={18} />;
+    case 'Instagram': return <Camera size={18} />;
+    case 'YouTube': return <Play size={18} />;
+    case 'Twitter/X': return <AtSign size={18} />;
+    case 'WhatsApp': return <MessageCircle size={18} />;
+    case 'Website': return <Globe size={18} />;
+    default: return <Link2 size={18} />;
+  }
+}
 
 export const metadata: Metadata = {
   title: 'About Us | Ahlesunnat Portal',
@@ -28,6 +40,9 @@ export default async function AboutPage() {
   const title = about.title?.trim() || 'About Us';
   const intro = about.intro?.trim();
   const hasContent = Boolean(about.content?.trim());
+  const socials = (about.socials || []).filter(s => s.platform?.trim() && s.url?.trim());
+  const phones = (about.phones || []).filter(p => p?.trim());
+  const showConnect = socials.length > 0 || phones.length > 0;
   const showDonation = donation.enabled && (Boolean(donation.description?.trim()) || donation.accounts.length > 0);
 
   return (
@@ -65,6 +80,46 @@ export default async function AboutPage() {
             <h2 className="text-lg font-bold text-muted-foreground">Content Coming Soon</h2>
             <p className="mt-2 text-sm text-muted-foreground/70">The About page content will appear here once published by the admin.</p>
           </div>
+        )}
+
+        {showConnect && (
+          <section className="mt-12 sm:mt-16">
+            <div className="rounded-3xl border border-white/10 bg-card/50 p-6 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">Connect With Us</h2>
+
+              {socials.length > 0 && (
+                <div className="mt-5 flex flex-wrap gap-3">
+                  {socials.map((s, i) => (
+                    <a
+                      key={i}
+                      href={s.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 rounded-full border border-white/10 bg-card px-4 py-2.5 text-sm font-semibold text-foreground/90 transition-colors hover:border-cyan-400/50 hover:text-cyan-300"
+                    >
+                      <span className="text-cyan-400">{socialIcon(s.platform)}</span>
+                      {s.platform}
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {phones.length > 0 && (
+                <div className="mt-6 flex flex-wrap gap-3">
+                  {phones.map((p, i) => (
+                    <a
+                      key={i}
+                      href={`tel:${p.replace(/\s+/g, '')}`}
+                      className="flex items-center gap-2 rounded-full border border-white/10 bg-card px-4 py-2.5 text-sm font-semibold text-foreground/90 transition-colors hover:border-cyan-400/50 hover:text-cyan-300"
+                    >
+                      <span className="text-cyan-400"><Phone size={18} /></span>
+                      {p}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
         )}
 
         {showDonation && (

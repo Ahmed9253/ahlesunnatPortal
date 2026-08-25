@@ -23,11 +23,31 @@ import {
   Info,
   Heart,
   Trash2,
+  ThumbsUp,
+  Camera,
+  Play,
+  AtSign,
+  Globe,
+  MessageCircle,
+  Phone,
+  Link2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
-import { DONATION_METHODS, DONATION_FIELD_LABELS } from '@/lib/types';
-import type { DonationAccount, DonationField } from '@/lib/types';
+import { DONATION_METHODS, DONATION_FIELD_LABELS, SOCIAL_PLATFORMS } from '@/lib/types';
+import type { DonationAccount, DonationField, SocialLink } from '@/lib/types';
+
+function socialIcon(platform: string, size = 16) {
+  switch (platform) {
+    case 'Facebook': return <ThumbsUp size={size} />;
+    case 'Instagram': return <Camera size={size} />;
+    case 'YouTube': return <Play size={size} />;
+    case 'Twitter/X': return <AtSign size={size} />;
+    case 'WhatsApp': return <MessageCircle size={size} />;
+    case 'Website': return <Globe size={size} />;
+    default: return <Link2 size={size} />;
+  }
+}
 
 type Stats = {
   totalArticles: number;
@@ -918,8 +938,17 @@ function UsersTab() {
   );
 }
 
+type AboutForm = {
+  title: string;
+  intro: string;
+  content: string;
+  image: string;
+  socials: SocialLink[];
+  phones: string[];
+};
+
 function AboutTab() {
-  const [form, setForm] = useState({ title: 'About Us', intro: '', content: '', image: '' });
+  const [form, setForm] = useState<AboutForm>({ title: 'About Us', intro: '', content: '', image: '', socials: [], phones: [] });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -933,12 +962,31 @@ function AboutTab() {
             intro: d.about.intro || '',
             content: d.about.content || '',
             image: d.about.image || '',
+            socials: Array.isArray(d.about.socials) ? d.about.socials : [],
+            phones: Array.isArray(d.about.phones) ? d.about.phones : [],
           });
         }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  const addSocial = (platform: string) =>
+    setForm(f => ({ ...f, socials: [...f.socials, { platform, url: '' }] }));
+
+  const updateSocial = (idx: number, patch: Partial<SocialLink>) =>
+    setForm(f => ({ ...f, socials: f.socials.map((s, i) => (i === idx ? { ...s, ...patch } : s)) }));
+
+  const removeSocial = (idx: number) =>
+    setForm(f => ({ ...f, socials: f.socials.filter((_, i) => i !== idx) }));
+
+  const addPhone = () => setForm(f => ({ ...f, phones: [...f.phones, ''] }));
+
+  const updatePhone = (idx: number, value: string) =>
+    setForm(f => ({ ...f, phones: f.phones.map((p, i) => (i === idx ? value : p)) }));
+
+  const removePhone = (idx: number) =>
+    setForm(f => ({ ...f, phones: f.phones.filter((_, i) => i !== idx) }));
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1032,6 +1080,48 @@ function AboutTab() {
         </div>
 
         <div>
+          <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Social Media</label>
+          <div className="flex flex-wrap gap-2">
+            {SOCIAL_PLATFORMS.map(p => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => addSocial(p)}
+                className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 bg-card px-3 py-2 text-xs font-semibold text-muted-foreground hover:border-cyan-400 hover:text-foreground transition-colors"
+              >
+                {socialIcon(p, 14)} {p}
+              </button>
+            ))}
+          </div>
+          {form.socials.length > 0 && (
+            <div className="mt-3 space-y-2">
+              {form.socials.map((s, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
+                    {socialIcon(s.platform, 16)}
+                  </span>
+                  <span className="w-24 shrink-0 truncate text-xs font-semibold text-muted-foreground">{s.platform}</span>
+                  <input
+                    placeholder="https://..."
+                    value={s.url}
+                    onChange={e => updateSocial(idx, { url: e.target.value })}
+                    className="w-full rounded-lg border border-white/10 bg-card px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground/50 outline-none focus:border-cyan-400 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeSocial(idx)}
+                    className="shrink-0 cursor-pointer rounded-lg border border-white/10 p-2 text-muted-foreground hover:border-red-400 hover:text-red-400 transition-colors"
+                    title="Remove"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
           <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Content</label>
           <textarea
             placeholder="Write the About page content here... Separate paragraphs with a blank line."
@@ -1040,6 +1130,48 @@ function AboutTab() {
             rows={14}
             className="w-full rounded-lg border border-white/10 bg-card px-4 py-3 text-sm text-foreground placeholder-muted-foreground/50 outline-none focus:border-cyan-400 resize-y leading-relaxed transition-colors"
           />
+        </div>
+
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="block text-xs font-semibold text-muted-foreground">Phone Numbers</label>
+            <button
+              type="button"
+              onClick={addPhone}
+              className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:border-cyan-400 hover:text-foreground transition-colors"
+            >
+              <Plus size={13} /> Add Number
+            </button>
+          </div>
+          {form.phones.length === 0 ? (
+            <p className="rounded-lg border border-dashed border-white/10 bg-card/40 py-4 text-center text-xs text-muted-foreground">
+              No phone numbers yet.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {form.phones.map((p, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
+                    <Phone size={16} />
+                  </span>
+                  <input
+                    placeholder="e.g. +92 300 1234567"
+                    value={p}
+                    onChange={e => updatePhone(idx, e.target.value)}
+                    className="w-full rounded-lg border border-white/10 bg-card px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground/50 outline-none focus:border-cyan-400 transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removePhone(idx)}
+                    className="shrink-0 cursor-pointer rounded-lg border border-white/10 p-2 text-muted-foreground hover:border-red-400 hover:text-red-400 transition-colors"
+                    title="Remove"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <button

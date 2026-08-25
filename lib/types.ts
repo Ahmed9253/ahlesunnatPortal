@@ -83,6 +83,11 @@ export type QuestionCategory = 'Fiqh' | 'Aqeedah' | 'Tafseer' | 'Hadith' | 'Seer
 
 export const QUESTION_CATEGORIES: QuestionCategory[] = ['Fiqh', 'Aqeedah', 'Tafseer', 'Hadith', 'Seerah', 'General'];
 
+export type SocialLink = {
+  platform: string;
+  url: string;
+};
+
 export type AboutContent = {
   _id?: ObjectId;
   key: 'about';
@@ -90,8 +95,12 @@ export type AboutContent = {
   intro: string;
   content: string;
   image: string;
+  socials: SocialLink[];
+  phones: string[];
   updatedAt: string;
 };
+
+export const SOCIAL_PLATFORMS = ['Facebook', 'Instagram', 'YouTube', 'Twitter/X', 'WhatsApp', 'Website'];
 
 export const DEFAULT_ABOUT: Omit<AboutContent, '_id'> = {
   key: 'about',
@@ -99,6 +108,8 @@ export const DEFAULT_ABOUT: Omit<AboutContent, '_id'> = {
   intro: '',
   content: '',
   image: '',
+  socials: [],
+  phones: [],
   updatedAt: '',
 };
 
