@@ -102,6 +102,41 @@ export const DEFAULT_ABOUT: Omit<AboutContent, '_id'> = {
   updatedAt: '',
 };
 
+export type DonationField = {
+  label: string;
+  value: string;
+};
+
+export type DonationAccount = {
+  id: string;
+  method: string;
+  holder: string;
+  fields: DonationField[];
+};
+
+export type DonationContent = {
+  _id?: ObjectId;
+  key: 'donation';
+  enabled: boolean;
+  title: string;
+  description: string;
+  accounts: DonationAccount[];
+  updatedAt: string;
+};
+
+export const DONATION_METHODS = ['Bank Account', 'EasyPaisa', 'JazzCash', 'SadaPay', 'NayaPay', 'Visa / Debit Card', 'PayPal', 'Other'];
+
+export const DONATION_FIELD_LABELS = ['Account Number', 'IBAN', 'Phone Number', 'Card Number', 'Branch', 'Bank Name', 'Other'];
+
+export const DEFAULT_DONATION: Omit<DonationContent, '_id'> = {
+  key: 'donation',
+  enabled: true,
+  title: 'Support Our Work',
+  description: '',
+  accounts: [],
+  updatedAt: '',
+};
+
 export function stripMongoId<T extends { _id?: unknown }>(doc: T): Omit<T, '_id'> {
   const copy = { ...doc } as Record<string, unknown>;
   delete copy._id;

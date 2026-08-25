@@ -21,9 +21,13 @@ import {
   Send,
   RefreshCw,
   Info,
+  Heart,
+  Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import ConfirmDialog from '@/components/ui/confirm-dialog';
+import { DONATION_METHODS, DONATION_FIELD_LABELS } from '@/lib/types';
+import type { DonationAccount, DonationField } from '@/lib/types';
 
 type Stats = {
   totalArticles: number;
@@ -36,7 +40,7 @@ type Stats = {
   starredQuestions: number;
 };
 
-type Tab = 'dashboard' | 'articles' | 'questions' | 'users' | 'about';
+type Tab = 'dashboard' | 'articles' | 'questions' | 'users' | 'about' | 'donation';
 
 export default function AdminDashboard() {
   const [tab, setTab] = useState<Tab>('dashboard');
@@ -59,6 +63,7 @@ export default function AdminDashboard() {
     { id: 'questions', label: 'Questions', icon: <MessageCircleQuestion size={18} /> },
     { id: 'users', label: 'Users', icon: <Users size={18} /> },
     { id: 'about', label: 'About', icon: <Info size={18} /> },
+    { id: 'donation', label: 'Donation', icon: <Heart size={18} /> },
   ];
 
   const handleNavClick = (id: Tab) => {
@@ -144,6 +149,7 @@ export default function AdminDashboard() {
         {tab === 'questions' && <QuestionsTab />}
         {tab === 'users' && <UsersTab />}
         {tab === 'about' && <AboutTab />}
+        {tab === 'donation' && <DonationTab />}
       </main>
     </div>
   );
@@ -1042,6 +1048,251 @@ function AboutTab() {
         >
           <Save size={14} />
           {saving ? 'Saving...' : 'Save About Page'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+type DonationForm = {
+  enabled: boolean;
+  title: string;
+  description: string;
+  accounts: DonationAccount[];
+};
+
+function DonationTab() {
+  const [form, setForm] = useState<DonationForm>({ enabled: true, title: 'Support Our Work', description: '', accounts: [] });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/donation')
+      .then(r => r.json())
+      .then(d => {
+        if (d.donation) {
+          setForm({
+            enabled: d.donation.enabled !== false,
+            title: d.donation.title || 'Support Our Work',
+            description: d.donation.description || '',
+            accounts: Array.isArray(d.donation.accounts) ? d.donation.accounts : [],
+          });
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const genId = () =>
+    typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2);
+
+  const addAccount = () =>
+    setForm(f => ({
+      ...f,
+      accounts: [...f.accounts, { id: genId(), method: DONATION_METHODS[0], holder: '', fields: [{ label: DONATION_FIELD_LABELS[0], value: '' }] }],
+    }));
+
+  const removeAccount = (id: string) =>
+    setForm(f => ({ ...f, accounts: f.accounts.filter(a => a.id !== id) }));
+
+  const updateAccount = (id: string, patch: Partial<DonationAccount>) =>
+    setForm(f => ({ ...f, accounts: f.accounts.map(a => (a.id === id ? { ...a, ...patch } : a)) }));
+
+  const addField = (id: string) =>
+    updateAccountFields(id, fields => [...fields, { label: DONATION_FIELD_LABELS[0], value: '' }]);
+
+  const removeField = (id: string, idx: number) =>
+    updateAccountFields(id, fields => fields.filter((_, i) => i !== idx));
+
+  const updateField = (id: string, idx: number, patch: Partial<DonationField>) =>
+    updateAccountFields(id, fields => fields.map((fl, i) => (i === idx ? { ...fl, ...patch } : fl)));
+
+  const updateAccountFields = (id: string, fn: (fields: DonationField[]) => DonationField[]) =>
+    setForm(f => ({ ...f, accounts: f.accounts.map(a => (a.id === id ? { ...a, fields: fn(a.fields) } : a)) }));
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const res = await fetch('/api/admin/donation', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        toast.success('Donation section updated successfully!');
+      } else {
+        const d = await res.json();
+        toast.error(d.error || 'Failed to update donation section');
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center py-32 text-zinc-500">
+      <RefreshCw size={20} className="animate-spin mr-2" />
+      Loading donation content...
+    </div>
+  );
+
+  const inputCls = "w-full rounded-lg border border-white/10 bg-card px-4 py-3 text-sm text-foreground placeholder-muted-foreground/50 outline-none focus:border-cyan-400 transition-colors";
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-8">
+        <Heart size={24} className="text-cyan-400" />
+        <h2 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">Donation Section</h2>
+      </div>
+
+      <form onSubmit={handleSave} className="space-y-6 max-w-3xl">
+        <div className="rounded-xl border border-white/10 bg-card/80 p-6 space-y-4">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.enabled}
+              onChange={e => setForm(f => ({ ...f, enabled: e.target.checked }))}
+              className="h-4 w-4 accent-cyan-500"
+            />
+            <span className="text-sm font-semibold text-foreground">Show donation section on the About page</span>
+          </label>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Section Title</label>
+            <input
+              placeholder="Support Our Work"
+              value={form.title}
+              onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+              className={inputCls}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Description</label>
+            <textarea
+              placeholder="Explain why donations matter and how they help... Separate paragraphs with a blank line."
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              rows={6}
+              className={`${inputCls} resize-y leading-relaxed`}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-foreground">Accounts</h3>
+            <button
+              type="button"
+              onClick={addAccount}
+              className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 bg-card px-3 py-2 text-xs font-semibold text-muted-foreground hover:border-cyan-400 hover:text-foreground transition-colors"
+            >
+              <Plus size={14} /> Add Account
+            </button>
+          </div>
+
+          {form.accounts.length === 0 && (
+            <p className="rounded-lg border border-dashed border-white/10 bg-card/40 py-8 text-center text-sm text-muted-foreground">
+              No accounts yet. Click &ldquo;Add Account&rdquo; to create one.
+            </p>
+          )}
+
+          {form.accounts.map((account) => (
+            <div key={account.id} className="rounded-xl border border-white/10 bg-card/80 p-5 space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="grid flex-1 gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Method</label>
+                    <select
+                      value={DONATION_METHODS.includes(account.method) ? account.method : 'Other'}
+                      onChange={e => updateAccount(account.id, { method: e.target.value === 'Other' ? '' : e.target.value })}
+                      className={inputCls}
+                    >
+                      {DONATION_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                    {!DONATION_METHODS.slice(0, -1).includes(account.method) && (
+                      <input
+                        placeholder="Custom method name"
+                        value={account.method}
+                        onChange={e => updateAccount(account.id, { method: e.target.value })}
+                        className={`${inputCls} mt-2`}
+                      />
+                    )}
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">Account Holder Name</label>
+                    <input
+                      placeholder="e.g. Ahle Sunnat Welfare Trust"
+                      value={account.holder}
+                      onChange={e => updateAccount(account.id, { holder: e.target.value })}
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeAccount(account.id)}
+                  className="mt-6 shrink-0 cursor-pointer rounded-lg border border-white/10 p-2 text-muted-foreground hover:border-red-400 hover:text-red-400 transition-colors"
+                  title="Remove account"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-muted-foreground">Details</label>
+                {account.fields.map((field, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <select
+                      value={DONATION_FIELD_LABELS.includes(field.label) ? field.label : 'Other'}
+                      onChange={e => updateField(account.id, idx, { label: e.target.value === 'Other' ? '' : e.target.value })}
+                      className={`${inputCls} sm:max-w-[180px]`}
+                    >
+                      {DONATION_FIELD_LABELS.map(l => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                    {!DONATION_FIELD_LABELS.slice(0, -1).includes(field.label) && (
+                      <input
+                        placeholder="Label"
+                        value={field.label}
+                        onChange={e => updateField(account.id, idx, { label: e.target.value })}
+                        className={`${inputCls} sm:max-w-[160px]`}
+                      />
+                    )}
+                    <input
+                      placeholder="Value"
+                      value={field.value}
+                      onChange={e => updateField(account.id, idx, { value: e.target.value })}
+                      className={inputCls}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeField(account.id, idx)}
+                      className="shrink-0 cursor-pointer rounded-lg border border-white/10 p-2 text-muted-foreground hover:border-red-400 hover:text-red-400 transition-colors"
+                      title="Remove field"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => addField(account.id)}
+                  className="flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+                >
+                  <Plus size={13} /> Add Field
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <button
+          disabled={saving}
+          className="flex cursor-pointer items-center gap-2 rounded-lg bg-cyan-500 px-6 py-3 text-sm font-bold text-zinc-950 hover:bg-cyan-400 disabled:opacity-40 transition-colors"
+        >
+          <Save size={14} />
+          {saving ? 'Saving...' : 'Save Donation Section'}
         </button>
       </form>
     </div>
